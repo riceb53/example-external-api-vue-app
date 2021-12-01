@@ -1,18 +1,51 @@
 <template>
   <div class="home">
-    <img alt="Vue logo" src="../assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+    <h1>{{ message }}</h1>
+    <a href="https://github.com/login/oauth/authorize?client_id=e1d0653dfbe54d01b15f">Sign into GitHub</a>
+
+     <div v-for="post in posts">
+      <h2>{{ post.title }}</h2>
+      <p>{{ post.body }}</p>
+    </div>
+
   </div>
 </template>
 
-<script>
-// @ is an alias to /src
-import HelloWorld from '@/components/HelloWorld.vue'
+<style></style>
 
+<script>
+import axios from 'axios'
 export default {
-  name: 'Home',
-  components: {
-    HelloWorld
-  }
-}
+  data: function () {
+    return {
+      message: "Welcome to Vue.js!",
+      posts: []
+    };
+  },
+  created: function () {
+    axios.get("https://jsonplaceholder.typicode.com/posts")
+    .then(response => {
+      console.log("jsonplaceholder", response.data);
+      this.posts = response.data;
+    });
+
+    axios
+      .get("/news_headlines")
+      .then(response => {
+        console.log("news api", response.data);
+      });
+
+    var code = this.$route.query.code;
+    if (code) {
+      axios.get("/auth/github/callback?code=" + code).then((response) => {
+        localStorage.setItem("github_access_token", response.data.access_token);
+        this.$router.push("/about");
+      });
+    }
+
+
+
+  },
+  methods: {},
+};
 </script>
